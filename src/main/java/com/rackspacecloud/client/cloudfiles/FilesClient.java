@@ -3108,7 +3108,7 @@ public String storeObjectAs(String container, String name, HttpEntity entity, Ma
 		return client.getParams().getParameter(HTTP.USER_AGENT).toString();
 	}
 	
-	private boolean isValidContainerName(String name) {
+	public static boolean isValidContainerName(String name) {
 		if (name == null) return false;
 		int length = name.length();
 		if (length == 0 || length > FilesConstants.CONTAINER_NAME_LENGTH) return false;
@@ -3116,7 +3116,7 @@ public String storeObjectAs(String container, String name, HttpEntity entity, Ma
 		//if (name.indexOf('?') != -1) return false;
 		return true;
 	}
-	private boolean isValidObjectName(String name) {
+        public static boolean isValidObjectName(String name) {
 		if (name == null) return false;
 		int length = name.length();
 		if (length == 0 || length > FilesConstants.OBJECT_NAME_LENGTH) return false;
