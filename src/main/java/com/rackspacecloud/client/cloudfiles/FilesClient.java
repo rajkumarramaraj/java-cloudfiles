@@ -2820,6 +2820,64 @@ public String storeObjectAs(String container, String name, HttpEntity entity, Ma
     	return null;
     }
 
+    public InputStream getObjectAsRangedStream (String container, String objName, long offset, long length) throws IOException, HttpException, FilesAuthorizationException, FilesInvalidNameException, FilesNotFoundException
+    {
+    	if (this.isLoggedin())
+    	{
+    		if (isValidContainerName(container) && isValidObjectName(objName))
+    		{
+    			if (objName.length() > FilesConstants.OBJECT_NAME_LENGTH)
+    			{
+    				logger.warn ("Object Name supplied was truncated to Max allowed of " + FilesConstants.OBJECT_NAME_LENGTH + " characters !");
+    				objName = objName.substring(0, FilesConstants.OBJECT_NAME_LENGTH);
+    				logger.warn ("Truncated Object Name is: " + objName);
+    			}
+
+    			HttpGet method = new HttpGet(storageURL+"/"+sanitizeForURI(container)+"/"+sanitizeForURI(objName));
+    			method.getParams().setIntParameter("http.socket.timeout", connectionTimeOut);
+    			method.setHeader(FilesConstants.X_AUTH_TOKEN, authToken);
+                        method.setHeader("Range", "bytes="+offset+"-"+length);
+    			FilesResponse response = new FilesResponse(client.execute(method));
+
+      			if (response.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+       				method.abort();
+    				login();
+    				method = new HttpGet(storageURL+"/"+sanitizeForURI(container)+"/"+sanitizeForURI(objName));
+        			method.getParams().setIntParameter("http.socket.timeout", connectionTimeOut);
+        			method.setHeader(FilesConstants.X_AUTH_TOKEN, authToken);
+        			response = new FilesResponse(client.execute(method));
+    			}
+
+      			if (response.getStatusCode() == HttpStatus.SC_OK)
+    			{
+    				logger.info ("Object data retreived  : "+objName);
+    				// DO NOT RELEASE THIS CONNECTION
+    				return response.getResponseBodyAsStream();
+    			}
+    			else if (response.getStatusCode() == HttpStatus.SC_NOT_FOUND)
+    			{
+    				method.abort();
+					throw new FilesNotFoundException("Container: " + container + " did not have object " + objName, 
+							 response.getResponseHeaders(), response.getStatusLine());
+    			}
+    		}
+    		else
+    		{
+    			if (!isValidObjectName(objName)) {
+    				throw new FilesInvalidNameException(objName);
+    			}
+    			else {
+    				throw new FilesInvalidNameException(container);
+    			}
+    		}
+    	}
+    	else {
+       		throw new FilesAuthorizationException("You must be logged in", null, null);
+    	}
+    	return null;
+    }
+
+
     /**
      * Utility function to write an InputStream to a file
      * 
