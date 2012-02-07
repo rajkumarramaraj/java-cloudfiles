@@ -179,14 +179,14 @@ public class FilesClient
     	        }
 
     	        @Override
-    	        protected ClientConnectionManager createClientConnectionManager() {
-    	            SchemeRegistry schemeRegistry = new SchemeRegistry();
-    	            schemeRegistry.register(
-    	                    new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-    	            schemeRegistry.register(
-    	                    new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
-    	            return new ThreadSafeClientConnManager(createHttpParams(), schemeRegistry);
-    	        }
+                protected ClientConnectionManager createClientConnectionManager() {
+       	            SchemeRegistry schemeRegistry = new SchemeRegistry();
+       	            schemeRegistry.register(
+       	                    new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+       	            schemeRegistry.register(
+       	                    new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
+       	            return new ThreadSafeClientConnManager(createHttpParams(), schemeRegistry);
+       	        }
     	    }, username, password, authUrl, account, connectionTimeOut);
 
      }
