@@ -2835,7 +2835,14 @@ public String storeObjectAs(String container, String name, HttpEntity entity, Ma
     			HttpGet method = new HttpGet(storageURL+"/"+sanitizeForURI(container)+"/"+sanitizeForURI(objName));
     			method.getParams().setIntParameter("http.socket.timeout", connectionTimeOut);
     			method.setHeader(FilesConstants.X_AUTH_TOKEN, authToken);
-                        method.setHeader("Range", "bytes="+offset+"-"+length);
+                        if (offset >= 0)
+    			{
+    				method.setHeader("Range", "bytes="+offset+"-"+length);
+    			}
+                        else
+    			{
+    				method.setHeader("Range", "bytes="+offset+"-");
+    			}
     			FilesResponse response = new FilesResponse(client.execute(method));
 
       			if (response.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
